@@ -1,0 +1,20 @@
+AI Prompting Techniques
+1. Shot-based Prompting
+Zero-shot: Ask the model to answer without examples.
+One-shot: Provide one example before the task.
+Few-shot: Provide a handful of examples to guide behavior.
+Many-shot: Give lots of examples (if context length allows) to steer outputs toward a specific pattern.
+
+2. Reasoning Prompts
+Chain of Thought (CoT): Encourage the model to show its reasoning steps before the final answer.
+"Let’s go step by step. First...": A simple phrasing that activates CoT by explicitly instructing sequential reasoning.
+"Now take a deep breath...": A softer version of CoT prompting that encourages the model to slow down and be methodical, often improving logical tasks.
+Tree of Thought (ToT): Instead of one reasoning chain, the model explores multiple possible reasoning paths (like branches) and evaluates them.
+Pose the question as if three experts were asked...: A multi-agent prompting strategy where the model simulates several perspectives before converging on the best solution.
+
+3. Knowledge-oriented Prompts
+Generated Knowledge Prompting: Ask the model to first recall or generate background knowledge before answering the actual question.
+Give an example of the information you specifically want it to look for: A guidance technique where you specify the type or format of knowledge to retrieve.
+4. Shaping & Steering Techniques
+Directional Stimulus: Provide a subtle nudge (hint, keyword, or style directive) that biases the model toward a desired type of response.
+Chain of Density: An advanced summarization technique where each iteration of a summary adds more detail and density while preserving clarity.
