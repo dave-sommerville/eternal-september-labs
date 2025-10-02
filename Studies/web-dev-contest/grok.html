@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Paint App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f0f0;
+        }
+        #toolbar {
+            background-color: #333;
+            padding: 10px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        #toolbar button, #toolbar select, #toolbar input {
+            padding: 5px;
+            margin: 0 5px;
+            cursor: pointer;
+        }
+        #canvasContainer {
+            border: 1px solid #000;
+            background-color: #fff;
+            margin-top: 10px;
+        }
+        #canvas {
+            cursor: crosshair;
+        }
+    </style>
+</head>
+<body>
+    <div id="toolbar">
+        <select id="brushType">
+            <option value="round">Round Brush</option>
+            <option value="square">Square Brush</option>
+            <option value="spray">Spray Brush</option>
+        </select>
+        <input type="color" id="colorPicker" value="#000000">
+        <button id="eraserBtn">Eraser</button>
+        <input type="range" id="brushSize" min="1" max="50" value="10">
+        <button id="undoBtn">Undo</button>
+        <button id="redoBtn">Redo</button>
+        <button id="resizeBtn">Resize Canvas</button>
+        <button id="clearBtn">Clear Canvas</button>
+    </div>
+    <div id="canvasContainer">
+        <canvas id="canvas" width="800" height="600"></canvas>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const brushType = document.getElementById('brushType');
+        const colorPicker = document.getElementById('colorPicker');
+        const eraserBtn = document.getElementById('eraserBtn');
+        const brushSize = document.getElementById('brushSize');
+        const undoBtn = document.getElementById('undoBtn');
+        const redoBtn = document.getElementById('redoBtn');
+        const resizeBtn = document.getElementById('resizeBtn');
+        const clearBtn = document.getElementById('clearBtn');
+
+        let painting = false;
+        let isEraser = false;
+        let undoStack = [];
+        let redoStack = [];
+
+        // Save initial canvas state
+        saveState();
+
+        function startPosition(e) {
+            painting = true;
+            draw(e);
+        }
+
+        function endPosition() {
+            painting = false;
+            ctx.beginPath();
+            saveState();
+        }
+
+        function draw(e) {
+            if (!painting) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const size = brushSize.value;
+            const color = isEraser ? '#ffffff' : colorPicker.value;
+
+            ctx.lineWidth = size;
+            ctx.lineCap = brushType.value === 'square' ? 'square' : 'round';
+            ctx.strokeStyle = color;
+
+            if (brushType.value === 'spray') {
+                for (let i = 0; i < 10; i++) {
+                    const offsetX = (Math.random() - 0.5) * size;
+                    const offsetY = (Math.random() - 0.5) * size;
+                    ctx.fillStyle = color;
+                    ctx.beginPath();
+                    ctx.arc(x + offsetX, y + offsetY, 1, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            } else {
+                ctx.lineTo(x, y);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+            }
+        }
+
+        function saveState() {
+            undoStack.push(canvas.toDataURL());
+            redoStack = [];
+            updateButtons();
+        }
+
+        function undo() {
+            if (undoStack.length > 1) {
+                redoStack.push(undoStack.pop());
+                const img = new Image();
+                img.src = undoStack[undoStack.length - 1];
+                img.onload = () => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0);
+                };
+            }
+            updateButtons();
+        }
+
+        function redo() {
+            if (redoStack.length > 0) {
+                const img = new Image();
+                img.src = redoStack.pop();
+                img.onload = () => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0);
+                    undoStack.push(canvas.toDataURL());
+                };
+            }
+            updateButtons();
+        }
+
+        function updateButtons() {
+            undoBtn.disabled = undoStack.length <= 1;
+            redoBtn.disabled = redoStack.length === 0;
+        }
+
+        function resizeCanvas() {
+            const width = prompt('Enter canvas width (px):', canvas.width);
+            const height = prompt('Enter canvas height (px):', canvas.height);
+            if (width && height && !isNaN(width) && !isNaN(height)) {
+                const img = new Image();
+                img.src = canvas.toDataURL();
+                img.onload = () => {
+                    canvas.width = parseInt(width);
+                    canvas.height = parseInt(height);
+                    ctx.drawImage(img, 0, 0);
+                    saveState();
+                };
+            }
+        }
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            saveState();
+        }
+
+        // Event Listeners
+        canvas.addEventListener('mousedown', startPosition);
+        canvas.addEventListener('mouseup', endPosition);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseout', endPosition);
+
+        eraserBtn.addEventListener('click', () => {
+            isEraser = !isEraser;
+            eraserBtn.textContent = isEraser ? 'Brush' : 'Eraser';
+        });
+
+        resizeBtn.addEventListener('click', resizeCanvas);
+        clearBtn.addEventListener('click', clearCanvas);
+        undoBtn.addEventListener('click', undo);
+        redoBtn.addEventListener('click', redo);
+
+        // Initialize canvas
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    </script>
+</body>
+</html>

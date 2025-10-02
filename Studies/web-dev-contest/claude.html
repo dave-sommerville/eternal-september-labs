@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Paint</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        .toolbar {
+            background: #fff;
+            padding: 10px;
+            border-bottom: 2px solid #ccc;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .tool-group {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            padding: 5px;
+            border-right: 1px solid #ddd;
+            padding-right: 15px;
+        }
+        .tool-group:last-child {
+            border-right: none;
+        }
+        button {
+            padding: 8px 12px;
+            border: 1px solid #999;
+            background: #fff;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        button:hover {
+            background: #e8e8e8;
+        }
+        button.active {
+            background: #d0d0d0;
+            border-color: #666;
+        }
+        input[type="color"] {
+            width: 50px;
+            height: 35px;
+            border: 1px solid #999;
+            cursor: pointer;
+        }
+        input[type="range"] {
+            width: 100px;
+        }
+        input[type="number"] {
+            width: 60px;
+            padding: 5px;
+            border: 1px solid #999;
+            border-radius: 3px;
+        }
+        label {
+            font-size: 12px;
+            color: #555;
+        }
+        .canvas-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: auto;
+            padding: 20px;
+        }
+        canvas {
+            background: white;
+            border: 2px solid #999;
+            cursor: crosshair;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="toolbar">
+        <div class="tool-group">
+            <button id="brushBtn" class="active">Brush</button>
+            <button id="eraserBtn">Eraser</button>
+        </div>
+        
+        <div class="tool-group">
+            <label>Texture:</label>
+            <button id="solidBtn" class="active">Solid</button>
+            <button id="sprayBtn">Spray</button>
+            <button id="sketchBtn">Sketch</button>
+        </div>
+        
+        <div class="tool-group">
+            <label>Color:</label>
+            <input type="color" id="colorPicker" value="#000000">
+        </div>
+        
+        <div class="tool-group">
+            <label>Size:</label>
+            <input type="range" id="sizeSlider" min="1" max="50" value="5">
+            <span id="sizeValue">5</span>
+        </div>
+        
+        <div class="tool-group">
+            <label>Canvas:</label>
+            <input type="number" id="widthInput" value="800" min="100" max="2000">
+            <span>×</span>
+            <input type="number" id="heightInput" value="600" min="100" max="2000">
+            <button id="resizeBtn">Resize</button>
+        </div>
+        
+        <div class="tool-group">
+            <button id="undoBtn">Undo</button>
+            <button id="redoBtn">Redo</button>
+            <button id="clearBtn">Clear</button>
+        </div>
+    </div>
+    
+    <div class="canvas-container">
+        <canvas id="canvas" width="800" height="600"></canvas>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        let drawing = false;
+        let tool = 'brush';
+        let texture = 'solid';
+        let color = '#000000';
+        let size = 5;
+        let history = [];
+        let historyStep = -1;
+        
+        // Initialize with blank canvas
+        saveState();
+        
+        // Tool selection
+        document.getElementById('brushBtn').addEventListener('click', function() {
+            tool = 'brush';
+            setActiveTool(this);
+        });
+        
+        document.getElementById('eraserBtn').addEventListener('click', function() {
+            tool = 'eraser';
+            setActiveTool(this);
+        });
+        
+        function setActiveTool(btn) {
+            document.querySelectorAll('#brushBtn, #eraserBtn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+        
+        // Texture selection
+        document.getElementById('solidBtn').addEventListener('click', function() {
+            texture = 'solid';
+            setActiveTexture(this);
+        });
+        
+        document.getElementById('sprayBtn').addEventListener('click', function() {
+            texture = 'spray';
+            setActiveTexture(this);
+        });
+        
+        document.getElementById('sketchBtn').addEventListener('click', function() {
+            texture = 'sketch';
+            setActiveTexture(this);
+        });
+        
+        function setActiveTexture(btn) {
+            document.querySelectorAll('#solidBtn, #sprayBtn, #sketchBtn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+        
+        // Color and size
+        document.getElementById('colorPicker').addEventListener('change', function(e) {
+            color = e.target.value;
+        });
+        
+        document.getElementById('sizeSlider').addEventListener('input', function(e) {
+            size = e.target.value;
+            document.getElementById('sizeValue').textContent = size;
+        });
+        
+        // Canvas resize
+        document.getElementById('resizeBtn').addEventListener('click', function() {
+            const w = parseInt(document.getElementById('widthInput').value);
+            const h = parseInt(document.getElementById('heightInput').value);
+            
+            const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            canvas.width = w;
+            canvas.height = h;
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, w, h);
+            ctx.putImageData(imgData, 0, 0);
+            saveState();
+        });
+        
+        // Undo/Redo
+        document.getElementById('undoBtn').addEventListener('click', undo);
+        document.getElementById('redoBtn').addEventListener('click', redo);
+        document.getElementById('clearBtn').addEventListener('click', function() {
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            saveState();
+        });
+        
+        function saveState() {
+            historyStep++;
+            if (historyStep < history.length) {
+                history.length = historyStep;
+            }
+            history.push(canvas.toDataURL());
+            if (history.length > 50) {
+                history.shift();
+                historyStep--;
+            }
+        }
+        
+        function undo() {
+            if (historyStep > 0) {
+                historyStep--;
+                restoreState();
+            }
+        }
+        
+        function redo() {
+            if (historyStep < history.length - 1) {
+                historyStep++;
+                restoreState();
+            }
+        }
+        
+        function restoreState() {
+            const img = new Image();
+            img.src = history[historyStep];
+            img.onload = function() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0);
+            };
+        }
+        
+        // Drawing functions
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+        
+        let lastX = 0;
+        let lastY = 0;
+        
+        function startDrawing(e) {
+            drawing = true;
+            const rect = canvas.getBoundingClientRect();
+            lastX = e.clientX - rect.left;
+            lastY = e.clientY - rect.top;
+        }
+        
+        function draw(e) {
+            if (!drawing) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            if (tool === 'eraser') {
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.fillStyle = 'rgba(0,0,0,1)';
+            } else {
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.fillStyle = color;
+                ctx.strokeStyle = color;
+            }
+            
+            if (texture === 'solid') {
+                ctx.lineWidth = size;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(x, y);
+                ctx.stroke();
+            } else if (texture === 'spray') {
+                const density = 20;
+                for (let i = 0; i < density; i++) {
+                    const offsetX = (Math.random() - 0.5) * size;
+                    const offsetY = (Math.random() - 0.5) * size;
+                    ctx.fillRect(x + offsetX, y + offsetY, 1, 1);
+                }
+            } else if (texture === 'sketch') {
+                ctx.lineWidth = Math.random() * size / 2;
+                ctx.globalAlpha = 0.6;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.moveTo(lastX + (Math.random() - 0.5) * 2, lastY + (Math.random() - 0.5) * 2);
+                ctx.lineTo(x + (Math.random() - 0.5) * 2, y + (Math.random() - 0.5) * 2);
+                ctx.stroke();
+                ctx.globalAlpha = 1.0;
+            }
+            
+            lastX = x;
+            lastY = y;
+        }
+        
+        function stopDrawing() {
+            if (drawing) {
+                drawing = false;
+                saveState();
+            }
+        }
+        
+        // Initialize with white background
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    </script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+DS Paint Prompt 
+
+Objective: An extremely simplified version of Microsoft Paint as a web app using html, javascript, and css. 
+Method: Single html document with script and style tags, fully functional in browser as single file, HTML canvas for the drawing surface,
+Specifications: User can choose from three paintbrush textures, choose any color from a dedicated menu, erase, control sizing of paint brush and eraser, resize canvas, and undo/redo actions,
+
+

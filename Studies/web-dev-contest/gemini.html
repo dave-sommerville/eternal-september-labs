@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Web Paint</title>
+    <style>
+        /* CSS STYLES */
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        #canvasContainer {
+            border: 1px solid #ccc;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            touch-action: none; /* Prevents default touch scrolling/gestures */
+        }
+
+        canvas {
+            display: block; /* Removes default canvas margin */
+        }
+
+        label, button {
+            font-size: 14px;
+        }
+
+        button {
+            padding: 8px 12px;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #d0d0d0;
+        }
+
+        button.active {
+            border-color: #007bff;
+            background-color: #007bff;
+            color: white;
+        }
+
+        /* Styling for the Brush Texture Buttons */
+        .texture-button {
+            font-style: italic;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="controls">
+        <label for="colorPicker">Color:</label>
+        <input type="color" id="colorPicker" value="#000000">
+
+        <label for="sizeSlider">Size: <span id="currentSize">5</span></label>
+        <input type="range" id="sizeSlider" min="1" max="50" value="5">
+
+        <button class="texture-button active" data-texture="round" title="Default Round Brush">Round</button>
+        <button class="texture-button" data-texture="square" title="Square Brush/Pixel-like">Square</button>
+        <button class="texture-button" data-texture="fuzzy" title="A 'Fuzzy' or less defined stroke">Fuzzy</button>
+
+        <button id="eraserBtn">Eraser</button>
+
+        <label for="widthInput">W:</label>
+        <input type="number" id="widthInput" value="800" min="100" max="2000" style="width: 60px;">
+        <label for="heightInput">H:</label>
+        <input type="number" id="heightInput" value="600" min="100" max="2000" style="width: 60px;">
+        <button id="resizeBtn">Resize Canvas</button>
+
+        <button id="undoBtn">Undo</button>
+        <button id="redoBtn" disabled>Redo</button>
+
+        <button id="clearBtn">Clear</button>
+    </div>
+
+    <div id="canvasContainer">
+        <canvas id="paintCanvas" width="800" height="600"></canvas>
+    </div>
+
+    <script>
+        // JAVASCRIPT LOGIC
+
+        // --- Setup Variables ---
+        const canvas = document.getElementById('paintCanvas');
+        const ctx = canvas.getContext('2d');
+        const colorPicker = document.getElementById('colorPicker');
+        const sizeSlider = document.getElementById('sizeSlider');
+        const currentSizeSpan = document.getElementById('currentSize');
+        const eraserBtn = document.getElementById('eraserBtn');
+        const resizeBtn = document.getElementById('resizeBtn');
+        const widthInput = document.getElementById('widthInput');
+        const heightInput = document.getElementById('heightInput');
+        const undoBtn = document.getElementById('undoBtn');
+        const redoBtn = document.getElementById('redoBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const textureButtons = document.querySelectorAll('.texture-button');
+
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
+
+        // Drawing State
+        let currentColor = colorPicker.value;
+        let currentSize = parseInt(sizeSlider.value);
+        let currentTexture = 'round'; // round, square, fuzzy
+        let isErasing = false;
+
+        // Undo/Redo State
+        let history = [];
+        let historyIndex = -1;
+        const MAX_HISTORY = 20; // Limit history size
+
+        // --- Utility Functions ---
+
+        /**
+         * Applies the current drawing settings to the canvas context.
+         */
+        function applySettings() {
+            ctx.lineWidth = currentSize;
+            
+            // Set line cap and join based on texture
+            if (currentTexture === 'round') {
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+            } else if (currentTexture === 'square') {
+                ctx.lineCap = 'butt'; // 'butt' is square-like
+                ctx.lineJoin = 'miter';
+            }
+            // For 'fuzzy', we use round cap/join but adjust globalAlpha for transparency
+            
+            // Set color or eraser
+            if (isErasing) {
+                ctx.strokeStyle = 'white'; // Use white to "erase" on a white background
+                ctx.globalAlpha = 1.0;
+            } else {
+                ctx.strokeStyle = currentColor;
+                // Reduce opacity for the 'fuzzy' effect
+                ctx.globalAlpha = currentTexture === 'fuzzy' ? 0.4 : 1.0;
+            }
+        }
+
+        /**
+         * Captures the current canvas state and adds it to the history stack.
+         */
+        function saveState() {
+            // Trim history to remove any 'future' states after an undo
+            if (historyIndex < history.length - 1) {
+                history = history.slice(0, historyIndex + 1);
+            }
+
+            // Capture the current canvas image data URL
+            const dataURL = canvas.toDataURL();
+            history.push(dataURL);
+            historyIndex++;
+
+            // Enforce max history size
+            if (history.length > MAX_HISTORY) {
+                history.shift(); // Remove the oldest state
+                historyIndex--;
+            }
+
+            updateUndoRedoButtons();
+        }
+        
+        /**
+         * Loads a canvas state from a data URL.
+         * @param {string} dataURL - The image data URL to load.
+         */
+        function loadState(dataURL) {
+            const img = new Image();
+            img.onload = function() {
+                // Clear the canvas and draw the saved image
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0);
+            };
+            img.src = dataURL;
+        }
+
+        /**
+         * Updates the disabled state of the Undo and Redo buttons.
+         */
+        function updateUndoRedoButtons() {
+            undoBtn.disabled = historyIndex <= 0;
+            redoBtn.disabled = historyIndex >= history.length - 1;
+        }
+
+        // --- Drawing Functions ---
+
+        /**
+         * Starts the drawing/erasing action.
+         * @param {number} x - The X coordinate.
+         * @param {number} y - The Y coordinate.
+         */
+        function startDrawing(x, y) {
+            isDrawing = true;
+            [lastX, lastY] = [x, y];
+            
+            // Start a new path for a single dot if the user just clicks/taps
+            applySettings();
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(lastX, lastY);
+            ctx.stroke();
+        }
+
+        /**
+         * Draws a line segment.
+         * @param {number} x - The X coordinate.
+         * @param {number} y - The Y coordinate.
+         */
+        function draw(x, y) {
+            if (!isDrawing) return;
+            
+            applySettings();
+            
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            
+            [lastX, lastY] = [x, y];
+        }
+
+        /**
+         * Stops the drawing/erasing action and saves the state.
+         */
+        function stopDrawing() {
+            if (isDrawing) {
+                isDrawing = false;
+                saveState(); // Save the state only after a drawing action is complete
+            }
+        }
+
+        // --- Event Handlers ---
+
+        // 1. Mouse Events
+        canvas.addEventListener('mousedown', (e) => {
+            // Get position relative to the canvas
+            const rect = canvas.getBoundingClientRect();
+            startDrawing(e.clientX - rect.left, e.clientY - rect.top);
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            // Get position relative to the canvas
+            const rect = canvas.getBoundingClientRect();
+            draw(e.clientX - rect.left, e.clientY - rect.top);
+        });
+
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+
+        // 2. Touch Events (for mobile/tablet support)
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // Prevent scrolling
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            startDrawing(touch.clientX - rect.left, touch.clientY - rect.top);
+        }, { passive: false });
+
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault(); // Prevent scrolling
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            draw(touch.clientX - rect.left, touch.clientY - rect.top);
+        }, { passive: false });
+
+        canvas.addEventListener('touchend', stopDrawing);
+
+        // 3. Control Panel Events
+
+        // Color Change
+        colorPicker.addEventListener('change', (e) => {
+            currentColor = e.target.value;
+            // When a new color is selected, automatically exit eraser mode
+            if (isErasing) {
+                isErasing = false;
+                eraserBtn.classList.remove('active');
+            }
+        });
+
+        // Size Change
+        sizeSlider.addEventListener('input', (e) => {
+            currentSize = parseInt(e.target.value);
+            currentSizeSpan.textContent = currentSize;
+        });
+
+        // Texture Change
+        textureButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                // Update active class
+                textureButtons.forEach(btn => btn.classList.remove('active'));
+                e.target.classList.add('active');
+
+                // Set new texture
+                currentTexture = e.target.getAttribute('data-texture');
+                
+                // Exit eraser mode if a new texture is selected
+                if (isErasing) {
+                    isErasing = false;
+                    eraserBtn.classList.remove('active');
+                }
+            });
+        });
+
+        // Eraser Toggle
+        eraserBtn.addEventListener('click', () => {
+            isErasing = !isErasing;
+            eraserBtn.classList.toggle('active', isErasing);
+            
+            // Deactivate all texture buttons when in eraser mode
+            if (isErasing) {
+                 textureButtons.forEach(btn => btn.classList.remove('active'));
+            } else {
+                 // Re-activate the current texture button when exiting eraser mode
+                 document.querySelector(`.texture-button[data-texture="${currentTexture}"]`).classList.add('active');
+            }
+        });
+        
+        // Canvas Resize
+        resizeBtn.addEventListener('click', () => {
+            const newWidth = parseInt(widthInput.value);
+            const newHeight = parseInt(heightInput.value);
+
+            if (newWidth > 0 && newHeight > 0) {
+                // 1. Save the current drawing before resizing
+                const dataURL = canvas.toDataURL();
+
+                // 2. Change canvas dimensions
+                canvas.width = newWidth;
+                canvas.height = newHeight;
+
+                // 3. Load the old drawing back onto the new canvas
+                // This will stretch/shrink the image, which is the expected behavior for a simple resize
+                loadState(dataURL);
+                
+                // 4. Save the new state (with the resized content)
+                saveState();
+            }
+        });
+        
+        // Undo
+        undoBtn.addEventListener('click', () => {
+            if (historyIndex > 0) {
+                historyIndex--;
+                loadState(history[historyIndex]);
+                updateUndoRedoButtons();
+            }
+        });
+
+        // Redo
+        redoBtn.addEventListener('click', () => {
+            if (historyIndex < history.length - 1) {
+                historyIndex++;
+                loadState(history[historyIndex]);
+                updateUndoRedoButtons();
+            }
+        });
+        
+        // Clear
+        clearBtn.addEventListener('click', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            saveState(); // Save the cleared state
+        });
+
+        // --- Initialization ---
+
+        // Draw an initial white background and save the state
+        function initCanvas() {
+            // Set initial canvas background to white (as it's transparent by default)
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            saveState();
+        }
+        
+        initCanvas();
+
+    </script>
+
+</body>
+</html>
