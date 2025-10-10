@@ -1,0 +1,50 @@
+<html lang="en">
+    
+
+<head>
+  <meta charset="utf-8">  <!-- May want to consider expanding for SEO-->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="author" content="Dave Sommerville">
+  <meta name="description" content="Explore Unreal City - a hub for web development and design tips. Learn HTML, CSS, JavaScript, and more.">
+  <meta name="theme-color" content="#ffffff">
+  <title>Ship Attack | DS Code</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Noto+Sans+Mono:wght@100..900&display=swap" rel="stylesheet">  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <link rel="stylesheet" href="./src/css/reset.css" media="all">
+  <link rel="stylesheet" href="./src/css/style.css" media="all">
+  <script src="./src/js/app.js" type="module"></script>
+</head>
+<body >
+  <main class="container f-col center">
+    <h1>Ship Attack</h1>
+    <section class="game-grid"></section>
+    <section class="start-controls">
+      <form class="ship-menu" autocomplete="off">
+        <input type="radio" id="carrier" name="ship-select" value="carrier" hidden>
+          <label for="carrier" data-ship="carrier">Carrier</label>
+        <input type="radio" id="battleship" name="ship-select" value="battleship" hidden>
+          <label for="battleship" data-ship="battleship">Battleship</label>
+        <input type="radio" id="cruiser" name="ship-select" value="cruiser" hidden>
+          <label for="cruiser" data-ship="cruiser">Cruiser</label>
+        <input type="radio" id="submarine" name="ship-select" value="submarine" hidden>
+          <label for="submarine" data-ship="submarine">Submarine</label>        
+        <input type="radio" id="destroyer" name="ship-select" value="destroyer" hidden>
+          <label for="destroyer" data-ship="destroyer">Destroyer</label>
+          <div class="start-btn btn">START</div>
+        </form>
+    </section>
+    <section class="display-area">
+      <div class="description-area">
+        <p class="descriptive-text"></p>
+        <p class="descriptive-text-two"></p>
+        <button class="reset-btn btn hidden">RESTART</button>
+      </div>
+      <div class="display-grid hidden"></div>
+    </section>
+  </main>
+</body>
+</html>

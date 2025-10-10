@@ -1,0 +1,90 @@
+Paint App Contest
+Front End Review
+ChatGPT: A+ (Met all requirements and added other intuitive and functional features beyond the prompt)
+Gemini: B (Square brush really choppy, boring design overall)
+Claude: B (Sketch brush interesting but sloppy, boring design overall)
+Grok: B (Uses alert for canvas resizing, boring design overall)
+
+LLM Model: ChatGPT 5
+Preview: No
+Lines: 483
+Speed: Slowest
+Overall Score: High
+Readability: High (Modular functions, good naming)
+- The code is organized into logical blocks 
+	- Elements, State, Helpers, Drawing Primitives, Event Listeners
+- Functions like drawDot and strokeBetween clearly abstract the drawing logic
+Scalability: High (Textured primitives, separate history stacks)
+- New textures are implemented by adding a case to the abstracted drawDot function
+- New shapes would be implemented by creating new, isolated functions that rely on the dot/stroke primitives
+- Robust undo/redo logic using separate history and future arrays.
+Intuition: High (Logical structure, explicit state)
+- Uses an elegant "Primitive-Based Drawing" pattern
+  - Drawing by calculating points along a stroke and calling a separate drawDot function for each point 
+  - This is highly intuitive for complex effects like Splatter and Chalk.
+*ChatGPT required additional fixing in its code after generation to work, but the mistake was common and easy to fix
+
+LLM Model: Gemini Flash 2.5
+Preview: No
+Lines: 402
+Speed: Medium
+Overall Score: Medium
+Readability: High (Clear variable setup, well-commented)
+- Excellent use of utility functions 
+  - applySettings, saveState, loadState
+- Logic for handling mouse and touch events is separated and clearly commented
+- Use of [lastX, lastY] = [x, y] is modern and concise
+Scalability: Medium (Global settings in applySettings, history management is complex)
+- Adding a new texture requires modifying the applySettings function and the drawing logic (for )
+  - For lineCap/lineJoin and globalAlpha/compositing respectively
+Intuition: High (Clean event handlers, utility functions)
+- Follows the standard Canvas beginPath/moveTo/lineTo/stroke pattern
+  - Familiar but requiring globalAlpha and other global settings to achieve different "textures"
+
+
+LLM Model: Claude 
+Preview: Yes
+Lines: 327
+Speed: Medium
+Overall Score: Medium
+Readability: Medium (Lacks utility functions, direct manipulation)
+- Decent structure
+- Core logic for drawing all three textures contained within a single draw function
+  - leading to a long, less-readable block with multiple if/else if statements
+Scalability: Medium-Low (Logic for different textures is mixed in draw function)
+- Adding a new texture means adding an else if block directly inside the main draw function
+  - Making that function increasingly large and difficult to manage
+Intuition: Medium (Simple, but lacks clear separation of concerns)
+- Standard Canvas line drawing for 'Solid'
+- Resorts to direct pixel manipulation (fillRect(..., 1, 1)) for 'Spray,' 
+  - Inconsistent and less intuitive for a unified "stroke" system
+
+LLM Model: Grok 4
+Preview: Yes
+Lines: 197
+Speed: Fastest
+Overall Score: Low
+Readability: Low (Minimal comments, simple variable names)
+- Minimal comments 
+- Draw function contains complex logic for the "spray" effect
+  - Hard to quickly grasp what's happening
+- State variables are managed globally, complicating tracing
+Scalability: Low (Monolithic draw function, single undoStack)
+- Core drawing loop is a tight, monolithic function
+- Adding a new tool/texture would heavily bloat the main draw function
+- Fragile undo/redo implementation
+  - Doesn't handle history limiting well
+Intuition: Low (Undo/Redo logic is confusingly coupled with drawing)
+- Draw function immediately starts a new path (ctx.beginPath(); ctx.moveTo(x, y);) after drawing a line to the current point
+  - Confusing way to manage path state
+- Difficult to debug
+
+
+
+
+
+
+
+
+
+

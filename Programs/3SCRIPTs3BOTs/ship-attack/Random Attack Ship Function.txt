@@ -1,0 +1,25 @@
+function takeTurn(cell) {
+  // User attacks computer
+  if (!user || !computer) return;
+  computer.attackResult(cell.key, textDisplayOne);
+  computer.displayComputerGrid(allGameGridCells);
+  // Computer randomly attacks user
+  const compTarget = user.getRandomUntriedCell(gridSize, allDisplayGridCells);
+  if (compTarget) {
+    user.attackResult(compTarget.key, textDisplayTwo);
+    user.displayUserGrid(allDisplayGridCells);
+  }
+  if(computer.hasLost() && user.hasLost()) {
+    textDisplayOne.innerText = "It's a tie";
+    textDisplayTwo.innerText = '';
+    removeClass(resetButton, 'hidden');
+  } else if (computer.hasLost()) {
+    textDisplayOne.innerText = "You win!";
+    textDisplayTwo.innerText = '';
+    removeClass(resetButton, 'hidden');
+  } else if (user.hasLost()) {
+    textDisplayOne.innerText = "You lose!";
+    textDisplayTwo.innerText = '';
+    removeClass(resetButton, 'hidden');
+  }
+}
