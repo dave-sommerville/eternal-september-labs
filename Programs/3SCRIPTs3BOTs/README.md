@@ -1,16 +1,8 @@
 ## 3SCRIPTs3BOTs
 
-![Connect Four Preview](https://dave-sommerville.github.io/ds-code-releases/img/connect-four.png)
-
-![Cheat Preview](https://dave-sommerville.github.io/ds-code-releases/img/cheat-console.png)
-
-![Ship Attack Preview](https://dave-sommerville.github.io/ds-code-releases/img/ship-attack.png)
-
-
-
-
-
 ### Name: Connect Four
+
+![Connect Four Preview](https://dave-sommerville.github.io/ds-code-releases/img/connect-four.png)
 
 Link: [Connect Four Program](https://github.com/dave-sommerville/eternal-september-labs/tree/main/Programs/3SCRIPTs3BOTs/connect-four)
 Description:
@@ -47,6 +39,8 @@ Connection Four is a solved game. As in, if the first player ensures every move 
 
 ### Name: Ship-Attack (Battleship)
 
+![Ship Attack Preview](https://dave-sommerville.github.io/ds-code-releases/img/ship-attack.png)
+
 Link: [Ship Attack](https://dave-sommerville.github.io/ship-attack/)
 
 Description:
@@ -82,6 +76,8 @@ Optimization Notes:
 
 ### Name: Cheat (Card Game)
 
+![Cheat Preview](https://dave-sommerville.github.io/ds-code-releases/img/cheat-console.png)
+
 Link: [Cheat](https://github.com/dave-sommerville/cheat)
 
 Description:
@@ -106,7 +102,7 @@ Script Used: C#
 
 Script Notes:
 
-C# is a very object oriented language with strong typing, making it very simple to set up card game interactions. Using the console is an effective way of conveying the game without a UI and the explicitness of c# methods make its execution clean and clear.
+C# is a very object oriented language with strong typing, making it very simple to set up card game interactions. Using the console is an effective way of conveying the game without a UI and the explicitness of C# methods make its execution clean and clear.
 
 Optimization Notes:
 
