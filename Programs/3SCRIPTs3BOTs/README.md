@@ -1,6 +1,12 @@
 ## 3SCRIPTs3BOTs
 
+![3SCRIPTs3BOTs Banner](https://dave-sommerville.github.io/ds-code-releases/img/Gemini_Generated_robots.png)
+
+The premise is simple enough. Three different examples of game AI written in three different programming languages. This is a part of my journey in learning more about AI. While ultimately I'm looking to create a customized AI agent with an LLM, I first wanted to hone my basics skills first. Each game presented a unique and engaging challenge. I've included links to and break downs of each bot below. 
+
 ### Name: Connect Four
+
+### Written In: Python
 
 ![Connect Four Preview](https://dave-sommerville.github.io/ds-code-releases/img/connect-four.png)
 
@@ -25,8 +31,6 @@ Driving Strategy: Minimax Algorithm, Alpha Beta Pruning
 * Explores the game tree of possible game states (possible future moves) to a certain depth\*
 * Evaluation function assigns a score to the board state to estimate its value
 
-Script Used: Python
-
 Personal Notes on Code:
 
 Python is my newest language, but this project was easy to conceptualize and execute. I find the code elegant and efficient. I have already built an intuition for programs like this in other languages and found Python easily adaptable.
@@ -38,6 +42,8 @@ Connection Four is a solved game. As in, if the first player ensures every move 
 ---
 
 ### Name: Ship-Attack (Battleship)
+
+### Written In: JavaScript
 
 ![Ship Attack Preview](https://dave-sommerville.github.io/ds-code-releases/img/ship-attack.png)
 
@@ -61,8 +67,6 @@ Driving Strategy: Hunt and Target
 * Hunt: Shoot randomly until landing a hit
 * Target: Test the areas around the hit and proceed linearly
 
-Script Used: JavaScript
-
 Script Notes:
 
 As a loosely typed language, JavaScript isn't the best language for complex game strategies. Its strength, however, is the ease in creating a web interface for you to play the game in. Ship-Attack was the best choice for JavaScript because it has the simplest logic and benefits the most from visual interactions.
@@ -75,6 +79,8 @@ Optimization Notes:
 ---
 
 ### Name: Cheat (Card Game)
+
+### Written In: C#
 
 ![Cheat Preview](https://dave-sommerville.github.io/ds-code-releases/img/cheat-console.png)
 
@@ -98,7 +104,6 @@ Driving Strategy:
 
 Heuristics: Card/Sequence tracking, Play evaluation
 
-Script Used: C#
 
 Script Notes:
 
