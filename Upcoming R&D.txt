@@ -1,0 +1,31 @@
+RESEARCH
+Topics:
+- Conscious Coding
+  - Most Efficient Practices/Use cases
+  - Actively fighting biases
+  - Privacy of personal data
+  - Security/Scalability
+- Intellisense
+- Deep Knowledge
+Tech Stack:
+- Docker
+- Langchain
+- GraphRAG
+
+
+DEVELOPMENT
+Projects:
+- Maze creating program
+- Recommendation algorithms
+- Atlas chatbot
+
+
+SILLY STUFF
+- Hallucination Interview/Article
+- App examination
+- Sora Newspeak/Cyber punk
+
+
+
+
+
