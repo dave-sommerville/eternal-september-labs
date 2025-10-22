@@ -2,7 +2,7 @@
 
 ![3SCRIPTs3BOTs Banner](https://dave-sommerville.github.io/ds-code-releases/img/Gemini_Generated_robots.png)
 
-The premise is simple enough. Three different examples of game AI written in three different programming languages. This is a part of my journey in learning more about AI. While ultimately I'm looking to create a customized AI agent with an LLM, I first wanted to hone my basics skills first. Each game presented a unique and engaging challenge. I've included links to and break downs of each bot below. 
+The premise is simple enough. Three different examples of game AI written in three different programming languages. I undertook this project to further deepen my understanding of AI, while ultimately I'm looking to create a customized agent with an LLM. Each game presented a unique and engaging challenge. I've included links to and break downs of each bot below. 
 
 ### Name: Connect Four
 
@@ -11,6 +11,7 @@ The premise is simple enough. Three different examples of game AI written in thr
 ![Connect Four Preview](https://dave-sommerville.github.io/ds-code-releases/img/connect-four.png)
 
 Link: [Connect Four Program](https://github.com/dave-sommerville/eternal-september-labs/tree/main/Programs/3SCRIPTs3BOTs/connect-four)
+
 Description:
 
 Connect Four is a two-player game played on a vertical board with a grid. Players take turns dropping colored discs from the top into a chosen column. The goal is to be the first player to get four of their own discs in a row, either horizontally, vertically, or diagonally.
@@ -33,11 +34,11 @@ Driving Strategy: Minimax Algorithm, Alpha Beta Pruning
 
 Personal Notes on Code:
 
-Python is my newest language, but this project was easy to conceptualize and execute. I find the code elegant and efficient. I have already built an intuition for programs like this in other languages and found Python easily adaptable.
+Python is my newest language, but this project was easy to conceptualize and execute. I found the code elegant and efficient. I have already built an intuition for programs like this in other languages and found Python easily adaptable.
 
 Optimization Notes:
 
-Connection Four is a solved game. As in, if the first player ensures every move is optimized, they will always win. This prevents much further optimization, although you have control of the depth of the branch pruning.
+Connect Four is a solved game. As in, if the first player ensures every move is optimized, they will always win. This prevents much further optimization, although you have control of the depth of the branch pruning.
 
 ---
 
