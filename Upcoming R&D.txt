@@ -1,12 +1,18 @@
 RESEARCH
 Topics:
-- Conscious Coding
-  - Most Efficient Practices/Use cases
+- Conscious Coding (application to Product Goal/User Stories)
+  - Most Efficient Practices
+  - Optimized deterministic code
   - Actively fighting biases
   - Privacy of personal data
   - Security/Scalability
-- Intellisense
+- How recommendation algorithms work and how the influence us
 - Deep Knowledge
+  - Linear Algebra/Derivatives
+  - Markov Chains
+  - Backpropagation
+  - Vector Embedding
+  - Gradient Descent
 Tech Stack:
 - Docker
 - Langchain
@@ -16,15 +22,13 @@ Tech Stack:
 DEVELOPMENT
 Projects:
 - Maze creating program
-- Recommendation algorithms
+- Recommendation algorithm lab
+  - Attempt my own smalle-scale recommendation algorithm
 - Atlas chatbot
 
 
 SILLY STUFF
-- Hallucination Interview/Article
-- App examination
-- Sora Newspeak/Cyber punk
-
+- AI App Review
 
 
 
